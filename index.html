@@ -1,0 +1,2443 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Perusahaan - Absensi Kamera, QR Karyawan & Panel Admin</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            min-height: 100vh;
+        }
+        .hidden {
+            display: none !important;
+        }
+        #login-section {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 440px;
+            padding: 36px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.15);
+        }
+        .login-card h2 {
+            color: #0f172a;
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+        .login-card p {
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            color: #334155;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 13.5px;
+        }
+        .input-clear-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .input-clear-wrap input {
+            padding-right: 36px;
+        }
+        .btn-clear-input {
+            position: absolute;
+            right: 10px;
+            background: #e2e8f0;
+            color: #475569;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .btn-clear-input:hover {
+            background: #cbd5e1;
+            color: #0f172a;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px 13px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #0284c7;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+        .form-group input[readonly] {
+            background-color: #e2e8f0;
+            color: #475569;
+            font-weight: 600;
+        }
+        .file-upload-wrapper {
+            border: 2px dashed #94a3b8;
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+        }
+        .file-upload-wrapper:hover {
+            border-color: #0284c7;
+            background: #f0f9ff;
+        }
+        .file-upload-wrapper input[type="file"] {
+            display: none;
+        }
+        .upload-label-text {
+            font-size: 13px;
+            color: #475569;
+            font-weight: 500;
+        }
+        .preview-container {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .preview-container img {
+            width: 85px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #0284c7;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        .preview-filename {
+            font-size: 12px;
+            color: #0284c7;
+            font-weight: 600;
+            word-break: break-all;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: #0284c7;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: #0369a1;
+        }
+        .btn-indigo {
+            width: 100%;
+            padding: 12px;
+            background: #4f46e5;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-indigo:hover {
+            background: #4338ca;
+        }
+        .btn-rose {
+            width: 100%;
+            padding: 12px;
+            background: #e11d48;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-rose:hover {
+            background: #be123c;
+        }
+        .btn-dark {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-dark:hover {
+            background: #1e293b;
+        }
+        .btn-emerald {
+            width: 100%;
+            padding: 12px;
+            background: #10b981;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .btn-emerald:hover {
+            background: #059669;
+        }
+        .alert {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 13.5px;
+            font-weight: 600;
+            text-align: center;
+            animation: shake 0.35s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        #portal-hub-section {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+        .hub-wrapper {
+            max-width: 960px;
+            margin: 50px auto 0;
+            padding: 0 20px;
+        }
+        .hub-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        .hub-header h2 {
+            font-size: 28px;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+        .hub-header p {
+            color: #475569;
+            font-size: 15px;
+        }
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 28px;
+        }
+        .hub-card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 34px 28px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .hub-card:hover {
+            transform: translateY(-4px);
+            border-color: #0284c7;
+        }
+        .hub-card.admin-card:hover {
+            border-color: #4f46e5;
+        }
+        .hub-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .hub-badge-emp {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        .hub-badge-adm {
+            background: #eef2ff;
+            color: #4338ca;
+        }
+        .hub-card h3 {
+            font-size: 22px;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+        .hub-card p {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.55;
+            margin-bottom: 24px;
+        }
+        .qr-box-container {
+            background: #f8fafc;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #qrcode-canvas {
+            padding: 10px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            margin-bottom: 12px;
+        }
+        .qr-link-display {
+            font-size: 12px;
+            color: #0284c7;
+            background: #e0f2fe;
+            padding: 6px 12px;
+            border-radius: 6px;
+            word-break: break-all;
+            font-weight: 600;
+            margin-bottom: 12px;
+            max-width: 100%;
+        }
+        .hub-actions {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        .btn-outline {
+            flex: 1;
+            padding: 10px;
+            background: #ffffff;
+            color: #0284c7;
+            border: 1.5px solid #0284c7;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-outline:hover {
+            background: #f0f9ff;
+        }
+        .admin-lock-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #eef2ff;
+            color: #4f46e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 20px;
+            border: 2px solid #c7d2fe;
+        }
+        #dashboard-section, #logout-section, #admin-panel-section {
+            padding-bottom: 50px;
+        }
+        .navbar {
+            background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 100%);
+            color: #ffffff;
+            padding: 16px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .navbar-logout {
+            background: linear-gradient(90deg, #4c0519 0%, #9f1239 100%);
+        }
+        .navbar-admin {
+            background: linear-gradient(90deg, #1e1b4b 0%, #312e81 100%);
+        }
+        .navbar h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .user-profile-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 5px 14px 5px 6px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .user-profile-pill img {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #38bdf8;
+        }
+        .login-time-badge {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #e0f2fe;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+        .btn-nav-hub {
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-nav-hub:hover {
+            background: rgba(255, 255, 255, 0.28);
+        }
+        .btn-logout {
+            background: #ef4444;
+            color: #ffffff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-logout:hover {
+            background: #dc2626;
+        }
+        .btn-back-login {
+            background: #0284c7;
+            color: #ffffff;
+            border: none;
+            padding: 9px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-back-login:hover {
+            background: #0369a1;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 28px auto 0;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 2.1fr;
+            gap: 25px;
+        }
+        .admin-grid {
+            max-width: 1280px;
+            margin: 28px auto 0;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px;
+        }
+        .stats-bar {
+            max-width: 1280px;
+            margin: 24px auto 0;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+        }
+        .stat-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+            border-left: 4px solid #4f46e5;
+        }
+        .stat-box h4 {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .stat-box .stat-val {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+        }
+        .card h3 {
+            margin-bottom: 18px;
+            color: #0f172a;
+            font-size: 18px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        .clock-box {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 12px;
+            border-radius: 9px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 16px;
+            border: 1px solid #bfdbfe;
+        }
+        .clock-box-out {
+            background: #fff1f2;
+            color: #be123c;
+            border: 1px solid #fecdd3;
+        }
+        .proof-preview-card {
+            background: #f0fdf4;
+            border: 1.5px solid #86efac;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .proof-preview-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .proof-preview-left img {
+            width: 54px;
+            height: 54px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #16a34a;
+        }
+        .proof-preview-info strong {
+            display: block;
+            font-size: 13px;
+            color: #166534;
+        }
+        .proof-preview-info span {
+            font-size: 11.5px;
+            color: #475569;
+        }
+        .btn-retake-sm {
+            background: #ffffff;
+            color: #0284c7;
+            border: 1px solid #0284c7;
+            padding: 6px 10px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-retake-sm:hover {
+            background: #e0f2fe;
+        }
+        .rule-info-box {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            padding: 11px 13px;
+            margin-bottom: 14px;
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: #334155;
+        }
+        .rule-info-box span.bonus-tag {
+            color: #15803d;
+            font-weight: 700;
+        }
+        .rule-info-box span.warn-tag {
+            color: #b45309;
+            font-weight: 700;
+        }
+        .rule-info-box span.cut-tag {
+            color: #b91c1c;
+            font-weight: 700;
+        }
+        .status-kondisi-box {
+            padding: 11px 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            text-align: center;
+            line-height: 1.45;
+        }
+        .kondisi-bonus {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+        .kondisi-peringatan {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1.5px solid #f59e0b;
+        }
+        .kondisi-telat {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1.5px solid #ef4444;
+        }
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .btn-excel {
+            background: #10b981;
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-excel:hover {
+            background: #059669;
+        }
+        .btn-excel-gaji {
+            background: #0d9488;
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-excel-gaji:hover {
+            background: #0f766e;
+        }
+        .btn-excel-keluar {
+            background: #e11d48;
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-excel-keluar:hover {
+            background: #be123c;
+        }
+        .btn-danger-sm {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .btn-danger-sm:hover {
+            background: #fecaca;
+        }
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .toggle-row:last-child {
+            border-bottom: none;
+        }
+        .toggle-row span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #334155;
+        }
+        .toggle-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #4f46e5;
+            cursor: pointer;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13.5px;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+        th {
+            background-color: #f8fafc;
+            color: #334155;
+            font-weight: 700;
+        }
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+        .table-proof-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 1.5px solid #cbd5e1;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: block;
+        }
+        .table-proof-thumb:hover {
+            transform: scale(1.12);
+            border-color: #0284c7;
+        }
+        .badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-hadir { background: #dcfce7; color: #166534; }
+        .badge-kurangtepat { background: #fef3c7; color: #b45309; }
+        .badge-terlambat { background: #fee2e2; color: #991b1b; }
+        .badge-izin { background: #e0f2fe; color: #075985; }
+        .badge-sakit { background: #f3e8ff; color: #6b21a8; }
+        .badge-lunas { background: #dcfce7; color: #15803d; }
+        .badge-proses { background: #fef9c3; color: #854d0e; }
+        .badge-pulang { background: #fce7f3; color: #9d174d; }
+        .badge-lembur { background: #f3e8ff; color: #6b21a8; }
+        .badge-cepat { background: #ffedd5; color: #9a3412; }
+
+        .text-plus { color: #15803d; font-weight: 600; }
+        .text-minus { color: #dc2626; font-weight: 600; }
+
+        .announcement-bar {
+            max-width: 1280px;
+            margin: 20px auto 0;
+            padding: 0 20px;
+        }
+        .announcement-inner {
+            background: #fef9c3;
+            border: 1px solid #fde047;
+            color: #854d0e;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .video-section {
+            max-width: 1280px;
+            margin: 28px auto 0;
+            padding: 0 20px;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .video-card {
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05);
+        }
+        .video-card video {
+            width: 100%;
+            border-radius: 10px;
+            display: block;
+            background: #000000;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+        }
+        .video-card input[type="file"] {
+            margin-top: 10px;
+            width: 100%;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+        .modal-box {
+            background: #ffffff;
+            max-width: 450px;
+            width: 100%;
+            border-radius: 18px;
+            padding: 28px 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            animation: popIn 0.28s ease-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.88); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .camera-viewport {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #0f172a;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            position: relative;
+            border: 2px solid #cbd5e1;
+        }
+        .camera-viewport video, .camera-viewport img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .camera-viewport video {
+            transform: scaleX(-1);
+        }
+        .modal-icon {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 34px;
+            font-weight: 700;
+            margin: 0 auto 18px;
+        }
+        .modal-bonus .modal-icon {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 3px solid #86efac;
+        }
+        .modal-warning .modal-icon {
+            background: #fef3c7;
+            color: #d97706;
+            border: 3px solid #fcd34d;
+        }
+        .modal-danger .modal-icon {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 3px solid #fca5a5;
+        }
+        .modal-admin-auth .modal-icon {
+            background: #eef2ff;
+            color: #4f46e5;
+            border: 3px solid #c7d2fe;
+        }
+        .modal-box h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #0f172a;
+        }
+        .modal-box p {
+            font-size: 13.5px;
+            color: #475569;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+        .modal-highlight {
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .modal-bonus .modal-highlight {
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+        .modal-warning .modal-highlight {
+            background: #fffbeb;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+        .modal-danger .modal-highlight {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+        .btn-modal-close {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        .modal-bonus .btn-modal-close { background: #16a34a; }
+        .modal-bonus .btn-modal-close:hover { background: #15803d; }
+        .modal-warning .btn-modal-close { background: #d97706; }
+        .modal-warning .btn-modal-close:hover { background: #b45309; }
+        .modal-danger .btn-modal-close { background: #dc2626; }
+        .modal-danger .btn-modal-close:hover { background: #b91c1c; }
+
+        .modal-btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        @media (max-width: 960px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="notif-modal" class="modal-overlay hidden">
+        <div id="notif-modal-card" class="modal-box modal-bonus">
+            <div id="notif-modal-icon" class="modal-icon">✓</div>
+            <h3 id="notif-modal-title">Notifikasi Kehadiran</h3>
+            <p id="notif-modal-desc">Keterangan absensi Anda telah tercatat.</p>
+            <div id="notif-modal-highlight" class="modal-highlight">+Bonus Rp 150.000</div>
+            <button onclick="tutupModalNotif()" class="btn-modal-close">Mengerti & Lanjutkan</button>
+        </div>
+    </div>
+
+    <div id="camera-gate-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h3>Ambil Foto Bukti Kehadiran</h3>
+            <p>Izinkan akses kamera dan ambil foto selfie Anda sebelum masuk ke halaman absensi karyawan.</p>
+            <div id="camera-error" class="alert hidden"></div>
+            <div class="camera-viewport">
+                <video id="camera-video" autoplay playsinline></video>
+                <img id="camera-captured-img" class="hidden" src="" alt="Hasil Foto">
+            </div>
+            <canvas id="camera-canvas" class="hidden"></canvas>
+            <div id="camera-controls-live" class="modal-btn-row">
+                <button type="button" onclick="batalKamera()" class="btn-outline" style="color:#475569; border-color:#cbd5e1;">Batal</button>
+                <button type="button" onclick="ambilFotoKamera()" class="btn-primary">📸 Ambil Foto</button>
+            </div>
+            <div id="camera-controls-confirm" class="modal-btn-row hidden">
+                <button type="button" onclick="ulangiFotoKamera()" class="btn-outline">Foto Ulang</button>
+                <button type="button" onclick="konfirmasiMasukKaryawan()" class="btn-emerald">Gunakan Foto & Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="image-zoom-modal" class="modal-overlay hidden" onclick="tutupZoomFoto()">
+        <div class="modal-box" style="max-width: 400px; padding: 18px;" onclick="event.stopPropagation()">
+            <h3 id="zoom-foto-title" style="margin-bottom: 12px; font-size: 17px;">Foto Bukti Masuk</h3>
+            <img id="zoom-foto-img" src="" alt="Bukti" style="width:100%; border-radius:12px; margin-bottom:14px; border:2px solid #cbd5e1;">
+            <button type="button" onclick="tutupZoomFoto()" class="btn-primary">Tutup</button>
+        </div>
+    </div>
+
+    <div id="admin-auth-modal" class="modal-overlay hidden">
+        <div class="modal-box modal-admin-auth">
+            <div class="modal-icon">🔒</div>
+            <h3>Verifikasi Password Admin</h3>
+            <p>Masukkan password administrator perusahaan untuk membuka pengaturan sistem.</p>
+            <div id="admin-auth-error" class="alert hidden"></div>
+            <form id="form-admin-auth">
+                <div class="form-group">
+                    <input type="password" id="input-admin-pass" required placeholder="Password Admin">
+                </div>
+                <div class="modal-btn-row">
+                    <button type="button" onclick="tutupModalAdmin()" class="btn-outline" style="color:#475569; border-color:#cbd5e1;">Batal</button>
+                    <button type="submit" class="btn-indigo">Masuk Admin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="login-section">
+        <div class="login-card">
+            <h2 class="brand-title-text">Portal Absensi & Gaji</h2>
+            <p>Masuk dengan akun & verifikasi foto karyawan terdaftar</p>
+            <div id="login-error" class="alert hidden"></div>
+            <form id="form-login" autocomplete="off">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" required autocomplete="off" placeholder="Masukkan username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required autocomplete="new-password" placeholder="Masukkan password">
+                </div>
+                <div class="form-group">
+                    <label>Foto Verifikasi Identitas</label>
+                    <label class="file-upload-wrapper" for="login-foto">
+                        <div class="upload-label-text">Klik untuk memilih file foto karyawan (.jpg / .png)</div>
+                        <input type="file" id="login-foto" accept="image/*">
+                        <div id="foto-preview-box" class="preview-container hidden">
+                            <img id="foto-preview-img" src="" alt="Preview Foto">
+                            <span id="foto-preview-name" class="preview-filename"></span>
+                        </div>
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary">Verifikasi & Masuk</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="portal-hub-section" class="hidden">
+        <nav class="navbar">
+            <h1 class="brand-title-text">Portal Sistem Perusahaan</h1>
+            <div class="nav-right">
+                <span class="login-time-badge">Login: <strong id="hub-login-time">-</strong></span>
+                <div class="user-profile-pill">
+                    <img id="hub-user-foto" src="" alt="Foto">
+                    <span>Halo, <strong id="hub-user">Staf</strong></span>
+                </div>
+                <button onclick="bukaTabLogout()" class="btn-logout">Absen Pulang / Logout</button>
+            </div>
+        </nav>
+
+        <div id="hub-announcement" class="announcement-bar hidden">
+            <div class="announcement-inner">
+                <span>📢</span>
+                <span id="hub-announcement-text"></span>
+            </div>
+        </div>
+
+        <div class="hub-wrapper">
+            <div class="hub-header">
+                <h2>Pilih Akses Portal</h2>
+                <p>Silakan pilih mode akses Karyawan (Scan QR Absensi) atau Pengaturan Admin Perusahaan</p>
+            </div>
+
+            <div class="hub-grid">
+                <div class="hub-card">
+                    <div>
+                        <span class="hub-badge hub-badge-emp">PORTAL KARYAWAN</span>
+                        <h3>Absensi Karyawan (Scan QR)</h3>
+                        <p>Pindai kode QR atau buka tautan untuk verifikasi kamera selfie sebelum masuk ke halaman absensi kerja.</p>
+                        <div class="qr-box-container">
+                            <div id="qrcode-canvas"></div>
+                            <div id="qr-url-text" class="qr-link-display">-</div>
+                            <div class="hub-actions">
+                                <button type="button" onclick="salinLinkQR()" class="btn-outline">Salin Link</button>
+                                <button type="button" onclick="unduhGambarQR()" class="btn-outline">Unduh QR</button>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="mulaiAksesKaryawanDenganKamera()" class="btn-primary">Buka Link Absensi Sekarang</button>
+                </div>
+
+                <div class="hub-card admin-card">
+                    <div>
+                        <span class="hub-badge hub-badge-adm">PANEL ADMINISTRATOR</span>
+                        <h3>Pengaturan Admin Perusahaan</h3>
+                        <p>Kelola nama perusahaan, aturan jam masuk, nominal bonus & potongan telat, pengumuman internal, password admin, dan manajemen database lokal.</p>
+                        <div class="admin-lock-icon">⚙️</div>
+                    </div>
+                    <button type="button" onclick="bukaModalAdmin()" class="btn-indigo">Masuk Pengaturan Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-section" class="hidden">
+        <nav class="navbar">
+            <h1 class="brand-title-text">Sistem Absensi Masuk & Penggajian Staf</h1>
+            <div class="nav-right">
+                <button onclick="kembaliKeHub()" class="btn-nav-hub">Menu Utama (QR / Admin)</button>
+                <span class="login-time-badge">Login: <strong id="display-login-time">-</strong></span>
+                <div class="user-profile-pill">
+                    <img id="display-user-foto" src="" alt="Foto">
+                    <span>Halo, <strong id="display-user">Staf</strong></span>
+                </div>
+                <button onclick="bukaTabLogout()" class="btn-logout">Absen Pulang / Logout</button>
+            </div>
+        </nav>
+
+        <div id="dash-announcement" class="announcement-bar hidden">
+            <div class="announcement-inner">
+                <span>📢</span>
+                <span id="dash-announcement-text"></span>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="card">
+                <h3>Form Absensi Masuk</h3>
+                <div class="clock-box" id="realtime-clock">00:00:00</div>
+                <div id="absensi-warning-inline" class="status-kondisi-box kondisi-bonus">
+                    Memeriksa ketepatan waktu...
+                </div>
+
+                <div id="active-proof-box" class="proof-preview-card hidden">
+                    <div class="proof-preview-left">
+                        <img id="active-proof-img" src="" alt="Bukti Kamera">
+                        <div class="proof-preview-info">
+                            <strong>✓ Foto Bukti Kamera Siap</strong>
+                            <span>Akan dilampirkan saat catat jam masuk</span>
+                        </div>
+                    </div>
+                    <button type="button" onclick="mulaiAksesKaryawanDenganKamera()" class="btn-retake-sm">Foto Ulang</button>
+                </div>
+
+                <form id="form-absensi" autocomplete="off">
+                    <div class="form-group">
+                        <label>Nama Staf / Pekerja</label>
+                        <div class="input-clear-wrap">
+                            <input type="text" id="input-nama" required autocomplete="off" placeholder="Ketik nama lengkap staf...">
+                            <button type="button" class="btn-clear-input" onclick="bersihkanInput('input-nama')" title="Hapus teks">×</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Status Kehadiran</label>
+                        <select id="input-status" required>
+                            <option value="Hadir">Hadir (Tepat Waktu)</option>
+                            <option value="KurangTepat">Kurang Tepat Waktu</option>
+                            <option value="Terlambat">Terlambat</option>
+                            <option value="Izin">Izin</option>
+                            <option value="Sakit">Sakit</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Catat Jam Masuk</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="table-header">
+                    <h3 style="border:none; margin:0; padding:0;">Data Pendataan Absensi Masuk</h3>
+                    <button onclick="exportExcelAbsensi()" class="btn-excel">Unduh Excel Masuk (.xlsx)</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="tabel-absensi">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Foto Bukti</th>
+                                <th>Jam Masuk</th>
+                                <th>Nama Staf</th>
+                                <th>Status Kehadiran</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-absensi">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="salary-module-container" class="container">
+            <div class="card">
+                <h3>Form Pendataan Gaji</h3>
+                <div id="rule-info-dynamic" class="rule-info-box"></div>
+                <div id="gaji-kondisi-banner" class="status-kondisi-box kondisi-bonus">
+                    Mendeteksi waktu kehadiran...
+                </div>
+                <form id="form-gaji" autocomplete="off">
+                    <div class="form-group">
+                        <label>Nama Staf / Pekerja</label>
+                        <div class="input-clear-wrap">
+                            <input type="text" id="gaji-nama" required autocomplete="off" placeholder="Ketik nama staf...">
+                            <button type="button" class="btn-clear-input" onclick="bersihkanInput('gaji-nama')" title="Hapus teks">×</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Jabatan / Divisi</label>
+                        <div class="input-clear-wrap">
+                            <input type="text" id="gaji-jabatan" required autocomplete="off" placeholder="Contoh: Guru / Staff IT / Admin">
+                            <button type="button" class="btn-clear-input" onclick="bersihkanInput('gaji-jabatan')" title="Hapus teks">×</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Acuan Jam Masuk</label>
+                        <input type="time" id="gaji-jam-acu" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gaji Pokok (Rp)</label>
+                        <input type="number" id="gaji-pokok" required min="0" placeholder="Contoh: 4500000" oninput="hitungOtomatisGaji()">
+                    </div>
+                    <div class="form-group">
+                        <label>Bonus Tepat Waktu & Tambahan (Rp)</label>
+                        <input type="number" id="gaji-bonus" required min="0" value="0" oninput="hitungOtomatisGaji()">
+                    </div>
+                    <div class="form-group">
+                        <label>Potongan Keterlambatan (Rp)</label>
+                        <input type="number" id="gaji-potongan" required min="0" value="0" oninput="hitungOtomatisGaji()">
+                    </div>
+                    <div class="form-group">
+                        <label>Estimasi Total Gaji Bersih</label>
+                        <input type="text" id="gaji-total-preview" readonly value="Rp 0">
+                    </div>
+                    <div class="form-group">
+                        <label>Status Pembayaran</label>
+                        <select id="gaji-status" required>
+                            <option value="Lunas">Lunas</option>
+                            <option value="Proses">Proses</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-indigo">Simpan Data Gaji</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="table-header">
+                    <h3 style="border:none; margin:0; padding:0;">Data Pendataan Gaji Staf</h3>
+                    <button onclick="exportExcelGaji()" class="btn-excel-gaji">Unduh Excel Gaji (.xlsx)</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="tabel-gaji">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Tanggal Input</th>
+                                <th>Nama Staf</th>
+                                <th>Jabatan</th>
+                                <th>Jam Masuk</th>
+                                <th>Gaji Pokok</th>
+                                <th>Bonus</th>
+                                <th>Potongan Telat</th>
+                                <th>Total Gaji</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-gaji">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="video-module-container" class="video-section">
+            <div class="video-grid">
+                <div class="video-card">
+                    <video id="vid-1" controls muted loop>
+                        <source src="video_perusahaan_1.mp4" type="video/mp4">
+                    </video>
+                    <input type="file" accept="video/*" onchange="gantiVideo(this, 'vid-1')">
+                </div>
+                <div class="video-card">
+                    <video id="vid-2" controls muted loop>
+                        <source src="video_iklan_2.mp4" type="video/mp4">
+                    </video>
+                    <input type="file" accept="video/*" onchange="gantiVideo(this, 'vid-2')">
+                </div>
+                <div class="video-card">
+                    <video id="vid-3" controls muted loop>
+                        <source src="video_profil_3.mp4" type="video/mp4">
+                    </video>
+                    <input type="file" accept="video/*" onchange="gantiVideo(this, 'vid-3')">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-panel-section" class="hidden">
+        <nav class="navbar navbar-admin">
+            <h1>Panel Administrator & Pengaturan Perusahaan</h1>
+            <div class="nav-right">
+                <button onclick="kembaliKeHub()" class="btn-nav-hub">Kembali ke Pilihan Portal</button>
+                <button onclick="mulaiAksesKaryawanDenganKamera()" class="btn-primary" style="width:auto; padding:8px 16px;">Buka Halaman Karyawan</button>
+                <button onclick="bukaTabLogout()" class="btn-logout">Logout</button>
+            </div>
+        </nav>
+
+        <div class="stats-bar">
+            <div class="stat-box">
+                <h4>Total Record Absensi Masuk</h4>
+                <div class="stat-val" id="stat-total-masuk">0</div>
+            </div>
+            <div class="stat-box" style="border-left-color: #10b981;">
+                <h4>Total Record Penggajian</h4>
+                <div class="stat-val" id="stat-total-gaji">0</div>
+            </div>
+            <div class="stat-box" style="border-left-color: #e11d48;">
+                <h4>Total Record Jam Keluar</h4>
+                <div class="stat-val" id="stat-total-keluar">0</div>
+            </div>
+            <div class="stat-box" style="border-left-color: #f59e0b;">
+                <h4>Karyawan Terdaftar (Foto)</h4>
+                <div class="stat-val">5 Staf</div>
+            </div>
+        </div>
+
+        <div class="admin-grid">
+            <div class="card">
+                <h3>1. Identitas & Pengumuman Perusahaan</h3>
+                <form id="form-admin-company">
+                    <div class="form-group">
+                        <label>Nama Perusahaan / Instansi</label>
+                        <input type="text" id="cfg-company-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Banner Pengumuman Internal (Opsional)</label>
+                        <input type="text" id="cfg-announcement" placeholder="Kosongkan jika tidak ada pengumuman">
+                    </div>
+                    <div class="form-group">
+                        <label>URL Custom Link Absensi QR (Opsional)</label>
+                        <input type="text" id="cfg-custom-qr-url" placeholder="Otomatis menggunakan link halaman ini">
+                    </div>
+                    <button type="submit" class="btn-indigo">Simpan Identitas Perusahaan</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>2. Kebijakan Jam Kerja, Bonus & Potongan</h3>
+                <form id="form-admin-policy">
+                    <div class="form-group">
+                        <label>Batas Jam Masuk Tepat Waktu (Dapat Bonus)</label>
+                        <input type="time" id="cfg-jam-bonus" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Batas Maksimal Jam Masuk (Lewat = Telat)</label>
+                        <input type="time" id="cfg-jam-telat" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nominal Bonus Tepat Waktu (Rp)</label>
+                        <input type="number" id="cfg-nominal-bonus" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nominal Potongan Keterlambatan (Rp)</label>
+                        <input type="number" id="cfg-nominal-potongan" min="0" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Simpan Kebijakan Gaji</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>3. Kontrol Fitur & Keamanan Admin</h3>
+                <div class="toggle-row">
+                    <span>Tampilkan Modul Penggajian di Karyawan</span>
+                    <input type="checkbox" id="cfg-show-salary" onchange="simpanToggleAdmin()">
+                </div>
+                <div class="toggle-row">
+                    <span>Tampilkan Video Profil Perusahaan</span>
+                    <input type="checkbox" id="cfg-show-video" onchange="simpanToggleAdmin()">
+                </div>
+                <div class="toggle-row">
+                    <span>Izinkan Absensi Masuk Aktif</span>
+                    <input type="checkbox" id="cfg-allow-absen" onchange="simpanToggleAdmin()">
+                </div>
+                <form id="form-admin-password" style="margin-top: 18px;">
+                    <div class="form-group">
+                        <label>Ganti Password Admin Baru</label>
+                        <input type="password" id="cfg-new-admin-pass" placeholder="Masukkan password baru">
+                    </div>
+                    <button type="submit" class="btn-dark">Perbarui Password Admin</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>4. Manajemen Data & Reset Sistem</h3>
+                <p style="font-size: 13.5px; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                    Unduh laporan keseluruhan atau bersihkan riwayat data lokal yang tersimpan di browser ini.
+                </p>
+                <button type="button" onclick="exportExcelAbsensi()" class="btn-excel" style="width:100%; margin-bottom:10px;">Unduh Semua Data Absensi Masuk (.xlsx)</button>
+                <button type="button" onclick="exportExcelGaji()" class="btn-excel-gaji" style="width:100%; margin-bottom:10px;">Unduh Semua Data Penggajian (.xlsx)</button>
+                <button type="button" onclick="exportExcelKeluar()" class="btn-excel-keluar" style="width:100%; margin-bottom:18px;">Unduh Semua Data Jam Keluar (.xlsx)</button>
+                <button type="button" onclick="hapusDataLokal('data_absensi_lokal', 'Data Absensi Masuk')" class="btn-danger-sm">Reset Data Absensi Masuk</button>
+                <button type="button" onclick="hapusDataLokal('data_gaji_lokal', 'Data Penggajian')" class="btn-danger-sm">Reset Data Penggajian</button>
+                <button type="button" onclick="hapusDataLokal('data_keluar_lokal', 'Data Jam Keluar')" class="btn-danger-sm">Reset Data Jam Keluar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="logout-section" class="hidden">
+        <nav class="navbar navbar-logout">
+            <h1>Sistem Absensi Pulang / Jam Keluar Staf</h1>
+            <div class="nav-right">
+                <span class="login-time-badge">Jam Login Masuk: <strong id="out-login-badge">-</strong></span>
+                <button onclick="selesaiDanKembaliLogin()" class="btn-back-login">Selesai & Kembali ke Login</button>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="card">
+                <h3>Form Jam Keluar Staf</h3>
+                <div class="clock-box clock-box-out" id="realtime-clock-out">00:00:00</div>
+                <form id="form-absensi-keluar" autocomplete="off">
+                    <div class="form-group">
+                        <label>Nama Staf / Pekerja</label>
+                        <div class="input-clear-wrap">
+                            <input type="text" id="keluar-nama" required autocomplete="off" placeholder="Ketik nama lengkap staf...">
+                            <button type="button" class="btn-clear-input" onclick="bersihkanInput('keluar-nama')" title="Hapus teks">×</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Jam Login Masuk</label>
+                        <input type="text" id="keluar-jam-masuk" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Keterangan Pulang</label>
+                        <select id="keluar-status" required>
+                            <option value="Pulang">Pulang Tepat Waktu</option>
+                            <option value="Lembur">Pulang Lembur</option>
+                            <option value="Cepat">Izin Pulang Cepat</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-rose">Catat Jam Keluar</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="table-header">
+                    <h3 style="border:none; margin:0; padding:0;">Data Pendataan Jam Keluar Staf</h3>
+                    <button onclick="exportExcelKeluar()" class="btn-excel-keluar">Unduh Excel Jam Keluar (.xlsx)</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="tabel-keluar">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Jam Login Masuk</th>
+                                <th>Jam Logout Keluar</th>
+                                <th>Nama Staf</th>
+                                <th>Keterangan Pulang</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-keluar">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ALLOWED_PHOTOS = [
+            {
+                name: "Iroha_NOT_CUTE_ANYMORE_(NOT_CUTE)_Concept_Photo_(2).jpg",
+                staffName: "Iroha",
+                signature: "702x1053|148,144,129|235,235,235|87,89,90"
+            },
+            {
+                name: "Minju_NOT_CUTE_ANYMORE_(NOT_CUTE)_Concept_Photo_(2).jpg",
+                staffName: "Minju",
+                signature: "702x1053|119,115,121|235,235,235|61,67,73"
+            },
+            {
+                name: "Moka_NOT_CUTE_ANYMORE_(NOT_CUTE)_Concept_Photo_(2).jpg",
+                staffName: "Moka",
+                signature: "702x1053|150,151,148|235,235,235|102,108,108"
+            },
+            {
+                name: "Wonhee_NOT_CUTE_ANYMORE_(NOT_CUTE)_Concept_Photo_(2).jpg",
+                staffName: "Wonhee",
+                signature: "702x1053|151,158,162|235,235,235|108,118,125"
+            },
+            {
+                name: "Yunah_NOT_CUTE_ANYMORE_(NOT_CUTE)_Concept_Photo_(2).jpg",
+                staffName: "Yunah",
+                signature: "702x1053|144,152,156|235,235,235|104,114,120"
+            }
+        ];
+
+        const DEFAULT_SETTINGS = {
+            companyName: "Portal Absensi & Penggajian Perusahaan",
+            announcement: "",
+            customQrUrl: "",
+            jamBonus: "07:00",
+            jamTelat: "08:00",
+            nominalBonus: 150000,
+            nominalPotongan: 100000,
+            showSalary: true,
+            showVideo: true,
+            allowAbsen: true,
+            adminPass: "admin123"
+        };
+
+        let activeCameraStream = null;
+        let capturedProofPhoto = "";
+
+        function bersihkanInput(inputId) {
+            const el = document.getElementById(inputId);
+            if (el) {
+                el.value = "";
+                el.focus();
+            }
+        }
+
+        function getSettings() {
+            const saved = JSON.parse(localStorage.getItem("company_admin_settings") || "{}");
+            return { ...DEFAULT_SETTINGS, ...saved };
+        }
+
+        function saveSettings(newSettings) {
+            localStorage.setItem("company_admin_settings", JSON.stringify(newSettings));
+            applySettingsToUI();
+        }
+
+        function applySettingsToUI() {
+            const cfg = getSettings();
+            document.querySelectorAll(".brand-title-text").forEach(el => {
+                el.textContent = cfg.companyName;
+            });
+
+            const hubAnn = document.getElementById("hub-announcement");
+            const dashAnn = document.getElementById("dash-announcement");
+            if (cfg.announcement && cfg.announcement.trim() !== "") {
+                document.getElementById("hub-announcement-text").textContent = cfg.announcement;
+                document.getElementById("dash-announcement-text").textContent = cfg.announcement;
+                hubAnn.classList.remove("hidden");
+                dashAnn.classList.remove("hidden");
+            } else {
+                hubAnn.classList.add("hidden");
+                dashAnn.classList.add("hidden");
+            }
+
+            const salContainer = document.getElementById("salary-module-container");
+            if (cfg.showSalary) {
+                salContainer.classList.remove("hidden");
+            } else {
+                salContainer.classList.add("hidden");
+            }
+
+            const vidContainer = document.getElementById("video-module-container");
+            if (cfg.showVideo) {
+                vidContainer.classList.remove("hidden");
+            } else {
+                vidContainer.classList.add("hidden");
+            }
+
+            const ruleBox = document.getElementById("rule-info-dynamic");
+            if (ruleBox) {
+                ruleBox.innerHTML = `
+                    • Masuk <strong>&le; ${cfg.jamBonus} Pagi</strong>: <span class="bonus-tag">+Bonus ${formatRupiah(cfg.nominalBonus)} & Notifikasi</span><br>
+                    • Masuk <strong>Setelah ${cfg.jamBonus} – ${cfg.jamTelat}</strong>: <span class="warn-tag">Peringatan Kurang Tepat Waktu (Rp 0)</span><br>
+                    • Masuk <strong>&gt; ${cfg.jamTelat} Pagi</strong>: <span class="cut-tag">Peringatan Telat & -Potongan ${formatRupiah(cfg.nominalPotongan)}</span>
+                `;
+            }
+        }
+
+        let uploadedDataUrl = "";
+        let uploadedFileName = "";
+        let uploadedSignature = "";
+
+        function computeImageSignature(img) {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const size = 16;
+            canvas.width = size;
+            canvas.height = size;
+            ctx.drawImage(img, 0, 0, size, size);
+            const data = ctx.getImageData(0, 0, size, size).data;
+
+            let rAll = 0, gAll = 0, bAll = 0, countAll = size * size;
+            let rTop = 0, gTop = 0, bTop = 0, countTop = 0;
+            let rBot = 0, gBot = 0, bBot = 0, countBot = 0;
+
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const idx = (y * size + x) * 4;
+                    rAll += data[idx];
+                    gAll += data[idx + 1];
+                    bAll += data[idx + 2];
+                    if (y < 4) {
+                        rTop += data[idx];
+                        gTop += data[idx + 1];
+                        bTop += data[idx + 2];
+                        countTop++;
+                    }
+                    if (y >= 12) {
+                        rBot += data[idx];
+                        gBot += data[idx + 1];
+                        bBot += data[idx + 2];
+                        countBot++;
+                    }
+                }
+            }
+            const avgAll = `${Math.round(rAll/countAll)},${Math.round(gAll/countAll)},${Math.round(bAll/countAll)}`;
+            const avgTop = `${Math.round(rTop/countTop)},${Math.round(gTop/countTop)},${Math.round(bTop/countTop)}`;
+            const avgBot = `${Math.round(rBot/countBot)},${Math.round(gBot/countBot)},${Math.round(bBot/countBot)}`;
+            return `${img.naturalWidth}x${img.naturalHeight}|${avgAll}|${avgTop}|${avgBot}`;
+        }
+
+        function isSignatureMatch(sigA, sigB) {
+            const partsA = sigA.split("|");
+            const partsB = sigB.split("|");
+            if (partsA[0] !== partsB[0]) return false;
+            for (let i = 1; i <= 3; i++) {
+                const rgbA = partsA[i].split(",").map(Number);
+                const rgbB = partsB[i].split(",").map(Number);
+                for (let c = 0; c < 3; c++) {
+                    if (Math.abs(rgbA[c] - rgbB[c]) > 12) return false;
+                }
+            }
+            return true;
+        }
+
+        document.getElementById("login-foto").addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            const errorBox = document.getElementById("login-error");
+            errorBox.classList.add("hidden");
+
+            if (!file) {
+                uploadedDataUrl = "";
+                uploadedFileName = "";
+                uploadedSignature = "";
+                document.getElementById("foto-preview-box").classList.add("hidden");
+                return;
+            }
+
+            uploadedFileName = file.name;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                uploadedDataUrl = event.target.result;
+                const img = new Image();
+                img.onload = function() {
+                    uploadedSignature = computeImageSignature(img);
+                    document.getElementById("foto-preview-img").src = uploadedDataUrl;
+                    document.getElementById("foto-preview-name").textContent = uploadedFileName;
+                    document.getElementById("foto-preview-box").classList.remove("hidden");
+                };
+                img.src = uploadedDataUrl;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function getWaktuSekarang() {
+            const now = new Date();
+            const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+            const jam = now.toLocaleTimeString('id-ID', { hour12: false });
+            return tgl + ", " + jam;
+        }
+
+        function getJamMenitSekarang() {
+            const now = new Date();
+            const hh = String(now.getHours()).padStart(2, '0');
+            const mm = String(now.getMinutes()).padStart(2, '0');
+            return `${hh}:${mm}`;
+        }
+
+        function formatRupiah(angka) {
+            const val = Number(angka);
+            return (val < 0 ? "-Rp " : "Rp ") + Math.abs(val).toLocaleString('id-ID');
+        }
+
+        function parseHHMMToMinutes(hhmm) {
+            const [h, m] = hhmm.split(":").map(Number);
+            return h * 60 + m;
+        }
+
+        function tampilkanModalNotif(tipe, judul, deskripsi, sorotan) {
+            const modal = document.getElementById("notif-modal");
+            const card = document.getElementById("notif-modal-card");
+            const icon = document.getElementById("notif-modal-icon");
+
+            card.className = "modal-box " + tipe;
+            if (tipe === "modal-bonus") {
+                icon.textContent = "★";
+            } else if (tipe === "modal-warning") {
+                icon.textContent = "!";
+            } else {
+                icon.textContent = "⚠";
+            }
+
+            document.getElementById("notif-modal-title").textContent = judul;
+            document.getElementById("notif-modal-desc").textContent = deskripsi;
+            document.getElementById("notif-modal-highlight").textContent = sorotan;
+            modal.classList.remove("hidden");
+        }
+
+        function tutupModalNotif() {
+            document.getElementById("notif-modal").classList.add("hidden");
+        }
+
+        async function mulaiAksesKaryawanDenganKamera() {
+            const modal = document.getElementById("camera-gate-modal");
+            const video = document.getElementById("camera-video");
+            const imgPreview = document.getElementById("camera-captured-img");
+            const errBox = document.getElementById("camera-error");
+
+            errBox.classList.add("hidden");
+            imgPreview.classList.add("hidden");
+            video.classList.remove("hidden");
+            document.getElementById("camera-controls-live").classList.remove("hidden");
+            document.getElementById("camera-controls-confirm").classList.add("hidden");
+            modal.classList.remove("hidden");
+
+            try {
+                hentikanKamera();
+                activeCameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: false
+                });
+                video.srcObject = activeCameraStream;
+            } catch (err) {
+                errBox.textContent = "Akses kamera ditolak atau kamera tidak ditemukan. Izinkan akses kamera pada browser untuk melanjutkan.";
+                errBox.classList.remove("hidden");
+            }
+        }
+
+        function hentikanKamera() {
+            if (activeCameraStream) {
+                activeCameraStream.getTracks().forEach(track => track.stop());
+                activeCameraStream = null;
+            }
+        }
+
+        function ambilFotoKamera() {
+            const video = document.getElementById("camera-video");
+            const canvas = document.getElementById("camera-canvas");
+            const imgPreview = document.getElementById("camera-captured-img");
+
+            if (!video.srcObject) return;
+
+            canvas.width = video.videoWidth || 480;
+            canvas.height = video.videoHeight || 360;
+            const ctx = canvas.getContext("2d");
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            capturedProofPhoto = canvas.toDataURL("image/jpeg", 0.72);
+            imgPreview.src = capturedProofPhoto;
+
+            video.classList.add("hidden");
+            imgPreview.classList.remove("hidden");
+            document.getElementById("camera-controls-live").classList.add("hidden");
+            document.getElementById("camera-controls-confirm").classList.remove("hidden");
+        }
+
+        function ulangiFotoKamera() {
+            const video = document.getElementById("camera-video");
+            const imgPreview = document.getElementById("camera-captured-img");
+            capturedProofPhoto = "";
+
+            imgPreview.classList.add("hidden");
+            video.classList.remove("hidden");
+            document.getElementById("camera-controls-live").classList.remove("hidden");
+            document.getElementById("camera-controls-confirm").classList.add("hidden");
+        }
+
+        function batalKamera() {
+            hentikanKamera();
+            document.getElementById("camera-gate-modal").classList.add("hidden");
+            if (window.location.hash === "#karyawan" && !sessionStorage.getItem("current_proof_photo")) {
+                window.location.hash = "";
+                cekRouting(false);
+            }
+        }
+
+        function konfirmasiMasukKaryawan() {
+            if (!capturedProofPhoto) return;
+            sessionStorage.setItem("current_proof_photo", capturedProofPhoto);
+            hentikanKamera();
+            document.getElementById("camera-gate-modal").classList.add("hidden");
+            window.location.hash = "#karyawan";
+            cekRouting(true);
+        }
+
+        function perbesarFotoBukti(src, nama) {
+            if (!src) return;
+            document.getElementById("zoom-foto-title").textContent = "Bukti Masuk: " + nama;
+            document.getElementById("zoom-foto-img").src = src;
+            document.getElementById("image-zoom-modal").classList.remove("hidden");
+        }
+
+        function tutupZoomFoto() {
+            document.getElementById("image-zoom-modal").classList.add("hidden");
+        }
+
+        function evaluasikanWaktuMasuk(jamHHMM, namaStaf, tampilkanPopup = false, forceStatus = "") {
+            const cfg = getSettings();
+            const bannerGaji = document.getElementById("gaji-kondisi-banner");
+            const bannerAbsen = document.getElementById("absensi-warning-inline");
+            const inputBonus = document.getElementById("gaji-bonus");
+            const inputPotongan = document.getElementById("gaji-potongan");
+
+            if (!jamHHMM) return "Hadir";
+            const totalMenit = parseHHMMToMinutes(jamHHMM);
+            const batasBonus = parseHHMMToMinutes(cfg.jamBonus);
+            const batasTelat = parseHHMMToMinutes(cfg.jamTelat);
+            const sapaan = namaStaf && namaStaf !== "" ? namaStaf : "Karyawan";
+
+            let hasilStatus = "Hadir";
+
+            if (forceStatus === "Terlambat" || totalMenit > batasTelat) {
+                hasilStatus = "Terlambat";
+                inputBonus.value = 0;
+                inputPotongan.value = cfg.nominalPotongan;
+
+                bannerGaji.className = "status-kondisi-box kondisi-telat";
+                bannerGaji.textContent = `PERINGATAN TELAT (${jamHHMM} > ${cfg.jamTelat}): Gaji dipotong ${formatRupiah(cfg.nominalPotongan)}`;
+
+                bannerAbsen.className = "status-kondisi-box kondisi-telat";
+                bannerAbsen.textContent = `⚠ Peringatan: Waktu saat ini (${jamHHMM}) melewati pukul ${cfg.jamTelat} (Terlambat).`;
+
+                if (tampilkanPopup) {
+                    tampilkanModalNotif(
+                        "modal-danger",
+                        "Peringatan Keterlambatan!",
+                        `Halo ${sapaan}, Anda tercatat masuk pukul ${jamHHMM} (melewati batas jam ${cfg.jamTelat}). Mohon tingkatkan kedisiplinan waktu kerja Anda.`,
+                        `Potongan Gaji: -${formatRupiah(cfg.nominalPotongan)}`
+                    );
+                }
+            } else if (forceStatus === "KurangTepat" || (totalMenit > batasBonus && totalMenit <= batasTelat)) {
+                hasilStatus = "KurangTepat";
+                inputBonus.value = 0;
+                inputPotongan.value = 0;
+
+                bannerGaji.className = "status-kondisi-box kondisi-peringatan";
+                bannerGaji.textContent = `PERINGATAN KURANG TEPAT (${jamHHMM}): Melewati pukul ${cfg.jamBonus}, tidak mendapat bonus.`;
+
+                bannerAbsen.className = "status-kondisi-box kondisi-peringatan";
+                bannerAbsen.textContent = `⚠ Peringatan: Waktu masuk (${jamHHMM}) kurang tepat waktu (lewat pukul ${cfg.jamBonus}).`;
+
+                if (tampilkanPopup) {
+                    tampilkanModalNotif(
+                        "modal-warning",
+                        "Peringatan: Kurang Tepat Waktu!",
+                        `Halo ${sapaan}, Anda hadir pukul ${jamHHMM}. Waktu kedatangan sudah melewati pukul ${cfg.jamBonus} sehingga tidak mendapatkan bonus tepat waktu.`,
+                        "Status: Tanpa Bonus (Rp 0)"
+                    );
+                }
+            } else {
+                hasilStatus = "Hadir";
+                inputBonus.value = cfg.nominalBonus;
+                inputPotongan.value = 0;
+
+                bannerGaji.className = "status-kondisi-box kondisi-bonus";
+                bannerGaji.textContent = `TEPAT WAKTU (${jamHHMM} ≤ ${cfg.jamBonus}): Mendapat Bonus +${formatRupiah(cfg.nominalBonus)}`;
+
+                bannerAbsen.className = "status-kondisi-box kondisi-bonus";
+                bannerAbsen.textContent = `✓ Luar Biasa! Waktu saat ini (${jamHHMM}) tepat waktu (≤ ${cfg.jamBonus}) & berhak atas bonus.`;
+
+                if (tampilkanPopup) {
+                    tampilkanModalNotif(
+                        "modal-bonus",
+                        "Selamat! Hadir Tepat Waktu",
+                        `Terima kasih ${sapaan}, Anda hadir tepat waktu pada pukul ${jamHHMM} (≤ ${cfg.jamBonus}). Apresiasi bonus kedisiplinan telah ditambahkan ke data gaji Anda.`,
+                        `Bonus Diterima: +${formatRupiah(cfg.nominalBonus)}`
+                    );
+                }
+            }
+
+            hitungOtomatisGaji();
+            return hasilStatus;
+        }
+
+        function hitungOtomatisGaji() {
+            const pokok = parseFloat(document.getElementById("gaji-pokok").value) || 0;
+            const bonus = parseFloat(document.getElementById("gaji-bonus").value) || 0;
+            const potongan = parseFloat(document.getElementById("gaji-potongan").value) || 0;
+            const totalBersih = Math.max(0, pokok + bonus - potongan);
+            document.getElementById("gaji-total-preview").value = formatRupiah(totalBersih);
+        }
+
+        document.getElementById("gaji-jam-acu").addEventListener("change", function() {
+            const nama = document.getElementById("gaji-nama").value.trim();
+            evaluasikanWaktuMasuk(this.value, nama, false, "");
+        });
+
+        function tampilkanErrorLogin(pesan) {
+            const errorBox = document.getElementById("login-error");
+            errorBox.textContent = pesan;
+            errorBox.classList.remove("hidden");
+            errorBox.style.animation = "none";
+            errorBox.offsetHeight;
+            errorBox.style.animation = "shake 0.35s ease-in-out";
+        }
+
+        function gantiVideo(input, videoId) {
+            const file = input.files[0];
+            if (file) {
+                const videoEl = document.getElementById(videoId);
+                videoEl.src = URL.createObjectURL(file);
+                videoEl.play();
+            }
+        }
+
+        function getQRTargetUrl() {
+            const cfg = getSettings();
+            if (cfg.customQrUrl && cfg.customQrUrl.trim() !== "") {
+                return cfg.customQrUrl.trim();
+            }
+            const base = window.location.href.split('#')[0].split('?')[0];
+            return base + "#karyawan";
+        }
+
+        function renderQRCode() {
+            const container = document.getElementById("qrcode-canvas");
+            const urlText = document.getElementById("qr-url-text");
+            const targetUrl = getQRTargetUrl();
+
+            container.innerHTML = "";
+            urlText.textContent = targetUrl;
+
+            new QRCode(container, {
+                text: targetUrl,
+                width: 170,
+                height: 170,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function salinLinkQR() {
+            const link = getQRTargetUrl();
+            navigator.clipboard.writeText(link).then(() => {
+                tampilkanModalNotif(
+                    "modal-bonus",
+                    "Link Absensi Disalin",
+                    "Tautan absensi karyawan berhasil disalin ke clipboard. Bagikan ke grup karyawan atau pindai QR code.",
+                    link
+                );
+            });
+        }
+
+        function unduhGambarQR() {
+            const img = document.querySelector("#qrcode-canvas img");
+            const canvas = document.querySelector("#qrcode-canvas canvas");
+            const dataUrl = img && img.src ? img.src : (canvas ? canvas.toDataURL("image/png") : "");
+            if (dataUrl) {
+                const a = document.createElement("a");
+                a.href = dataUrl;
+                a.download = "QR_Absensi_Karyawan.png";
+                a.click();
+            }
+        }
+
+        function kembaliKeHub() {
+            hentikanKamera();
+            window.location.hash = "";
+            cekRouting(false);
+        }
+
+        function bukaModalAdmin() {
+            document.getElementById("admin-auth-error").classList.add("hidden");
+            document.getElementById("input-admin-pass").value = "";
+            document.getElementById("admin-auth-modal").classList.remove("hidden");
+            setTimeout(() => document.getElementById("input-admin-pass").focus(), 100);
+        }
+
+        function tutupModalAdmin() {
+            document.getElementById("admin-auth-modal").classList.add("hidden");
+        }
+
+        document.getElementById("form-admin-auth").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const passInput = document.getElementById("input-admin-pass").value;
+            const cfg = getSettings();
+            if (passInput === cfg.adminPass) {
+                sessionStorage.setItem("admin_unlocked", "true");
+                tutupModalAdmin();
+                window.location.hash = "#admin";
+                cekRouting(false);
+            } else {
+                const err = document.getElementById("admin-auth-error");
+                err.textContent = "Password Admin salah! Akses ditolak.";
+                err.classList.remove("hidden");
+            }
+        });
+
+        function muatFormPengaturanAdmin() {
+            const cfg = getSettings();
+            document.getElementById("cfg-company-name").value = cfg.companyName;
+            document.getElementById("cfg-announcement").value = cfg.announcement;
+            document.getElementById("cfg-custom-qr-url").value = cfg.customQrUrl;
+            document.getElementById("cfg-jam-bonus").value = cfg.jamBonus;
+            document.getElementById("cfg-jam-telat").value = cfg.jamTelat;
+            document.getElementById("cfg-nominal-bonus").value = cfg.nominalBonus;
+            document.getElementById("cfg-nominal-potongan").value = cfg.nominalPotongan;
+            document.getElementById("cfg-show-salary").checked = cfg.showSalary;
+            document.getElementById("cfg-show-video").checked = cfg.showVideo;
+            document.getElementById("cfg-allow-absen").checked = cfg.allowAbsen;
+
+            const dMasuk = JSON.parse(localStorage.getItem("data_absensi_lokal") || "[]");
+            const dGaji = JSON.parse(localStorage.getItem("data_gaji_lokal") || "[]");
+            const dKeluar = JSON.parse(localStorage.getItem("data_keluar_lokal") || "[]");
+            document.getElementById("stat-total-masuk").textContent = dMasuk.length;
+            document.getElementById("stat-total-gaji").textContent = dGaji.length;
+            document.getElementById("stat-total-keluar").textContent = dKeluar.length;
+        }
+
+        document.getElementById("form-admin-company").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const cfg = getSettings();
+            cfg.companyName = document.getElementById("cfg-company-name").value.trim() || DEFAULT_SETTINGS.companyName;
+            cfg.announcement = document.getElementById("cfg-announcement").value.trim();
+            cfg.customQrUrl = document.getElementById("cfg-custom-qr-url").value.trim();
+            saveSettings(cfg);
+            tampilkanModalNotif("modal-bonus", "Pengaturan Disimpan", "Identitas perusahaan dan konfigurasi QR berhasil diperbarui.", cfg.companyName);
+        });
+
+        document.getElementById("form-admin-policy").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const cfg = getSettings();
+            cfg.jamBonus = document.getElementById("cfg-jam-bonus").value;
+            cfg.jamTelat = document.getElementById("cfg-jam-telat").value;
+            cfg.nominalBonus = parseFloat(document.getElementById("cfg-nominal-bonus").value) || 0;
+            cfg.nominalPotongan = parseFloat(document.getElementById("cfg-nominal-potongan").value) || 0;
+            saveSettings(cfg);
+            tampilkanModalNotif(
+                "modal-bonus",
+                "Kebijakan Gaji Diperbarui",
+                `Aturan baru aktif: Bonus ≤ ${cfg.jamBonus} (+${formatRupiah(cfg.nominalBonus)}), Telat > ${cfg.jamTelat} (-${formatRupiah(cfg.nominalPotongan)}).`,
+                "Kebijakan Berhasil Diterapkan"
+            );
+        });
+
+        function simpanToggleAdmin() {
+            const cfg = getSettings();
+            cfg.showSalary = document.getElementById("cfg-show-salary").checked;
+            cfg.showVideo = document.getElementById("cfg-show-video").checked;
+            cfg.allowAbsen = document.getElementById("cfg-allow-absen").checked;
+            saveSettings(cfg);
+        }
+
+        document.getElementById("form-admin-password").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const newPass = document.getElementById("cfg-new-admin-pass").value.trim();
+            if (newPass.length < 4) {
+                tampilkanModalNotif("modal-danger", "Password Terlalu Pendek", "Password admin minimal terdiri dari 4 karakter.", "Gagal Mengubah Password");
+                return;
+            }
+            const cfg = getSettings();
+            cfg.adminPass = newPass;
+            saveSettings(cfg);
+            document.getElementById("cfg-new-admin-pass").value = "";
+            tampilkanModalNotif("modal-bonus", "Password Admin Diperbarui", "Password baru administrator berhasil disimpan untuk sesi berikutnya.", "Keamanan Diperbarui");
+        });
+
+        function hapusDataLokal(storageKey, label) {
+            localStorage.removeItem(storageKey);
+            muatFormPengaturanAdmin();
+            tampilkanModalNotif("modal-warning", "Data Direset", `Seluruh riwayat ${label} telah dihapus dari penyimpanan sistem.`, `${label} Kosong`);
+        }
+
+        function sembunyikanSemuaHalaman() {
+            document.getElementById("login-section").classList.add("hidden");
+            document.getElementById("portal-hub-section").classList.add("hidden");
+            document.getElementById("dashboard-section").classList.add("hidden");
+            document.getElementById("admin-panel-section").classList.add("hidden");
+            document.getElementById("logout-section").classList.add("hidden");
+        }
+
+        function cekRouting(baruMasukKaryawan = false) {
+            applySettingsToUI();
+            const currentHash = window.location.hash;
+            const activeUser = localStorage.getItem("absensi_user");
+            const loginTime = localStorage.getItem("absensi_login_time");
+            const loginHHMM = localStorage.getItem("absensi_login_hhmm");
+            const userPhoto = localStorage.getItem("absensi_user_photo");
+
+            sembunyikanSemuaHalaman();
+
+            if (currentHash === "#logout") {
+                const lastLogin = localStorage.getItem("last_logout_in") || loginTime || "-";
+
+                document.getElementById("logout-section").classList.remove("hidden");
+                document.getElementById("out-login-badge").textContent = lastLogin;
+                document.getElementById("keluar-nama").value = "";
+                document.getElementById("keluar-jam-masuk").value = lastLogin;
+                muatDataKeluar();
+                return;
+            }
+
+            if (!activeUser) {
+                document.getElementById("login-section").classList.remove("hidden");
+                return;
+            }
+
+            if (currentHash === "#admin") {
+                if (sessionStorage.getItem("admin_unlocked") === "true") {
+                    document.getElementById("admin-panel-section").classList.remove("hidden");
+                    muatFormPengaturanAdmin();
+                } else {
+                    window.location.hash = "";
+                    document.getElementById("portal-hub-section").classList.remove("hidden");
+                    isiHeaderHub(activeUser, loginTime, userPhoto);
+                    renderQRCode();
+                    bukaModalAdmin();
+                }
+                return;
+            }
+
+            if (currentHash === "#karyawan") {
+                const proofPhoto = sessionStorage.getItem("current_proof_photo");
+                if (!proofPhoto) {
+                    document.getElementById("portal-hub-section").classList.remove("hidden");
+                    isiHeaderHub(activeUser, loginTime, userPhoto);
+                    renderQRCode();
+                    mulaiAksesKaryawanDenganKamera();
+                    return;
+                }
+
+                document.getElementById("dashboard-section").classList.remove("hidden");
+                document.getElementById("display-user").textContent = activeUser;
+                document.getElementById("display-login-time").textContent = loginTime || "-";
+                if (userPhoto) {
+                    document.getElementById("display-user-foto").src = userPhoto;
+                }
+
+                document.getElementById("active-proof-img").src = proofPhoto;
+                document.getElementById("active-proof-box").classList.remove("hidden");
+
+                document.getElementById("input-nama").value = "";
+                document.getElementById("gaji-nama").value = "";
+
+                const jamAcuan = loginHHMM || getJamMenitSekarang();
+                document.getElementById("gaji-jam-acu").value = jamAcuan;
+                const statusAuto = evaluasikanWaktuMasuk(jamAcuan, "", baruMasukKaryawan, "");
+                document.getElementById("input-status").value = statusAuto;
+
+                muatDataAbsensi();
+                muatDataGaji();
+                return;
+            }
+
+            document.getElementById("portal-hub-section").classList.remove("hidden");
+            isiHeaderHub(activeUser, loginTime, userPhoto);
+            renderQRCode();
+        }
+
+        function isiHeaderHub(user, loginTime, userPhoto) {
+            document.getElementById("hub-user").textContent = user;
+            document.getElementById("hub-login-time").textContent = loginTime || "-";
+            if (userPhoto) {
+                document.getElementById("hub-user-foto").src = userPhoto;
+            }
+        }
+
+        window.addEventListener("hashchange", () => cekRouting(false));
+
+        document.getElementById("form-login").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const username = document.getElementById("login-username").value.trim();
+            const password = document.getElementById("login-password").value.trim();
+
+            if (username === "" || password === "") {
+                tampilkanErrorLogin("Login Gagal! Username dan password wajib diisi.");
+                return;
+            }
+
+            if (!uploadedDataUrl) {
+                tampilkanErrorLogin("Login Gagal! Anda wajib mengunggah foto identitas karyawan.");
+                return;
+            }
+
+            const matchedMember = ALLOWED_PHOTOS.find(item =>
+                item.name.toLowerCase() === uploadedFileName.toLowerCase() ||
+                isSignatureMatch(uploadedSignature, item.signature)
+            );
+
+            if (!matchedMember) {
+                tampilkanErrorLogin("Login Gagal! Foto tidak dikenali atau bukan 5 karyawan yang terdaftar.");
+                return;
+            }
+
+            const hhmmNow = getJamMenitSekarang();
+            localStorage.setItem("absensi_user", username);
+            localStorage.setItem("absensi_login_time", getWaktuSekarang());
+            localStorage.setItem("absensi_login_hhmm", hhmmNow);
+            localStorage.setItem("absensi_user_photo", uploadedDataUrl);
+            document.getElementById("login-error").classList.add("hidden");
+
+            const wantsKaryawan = window.location.hash === "#karyawan";
+            if (!wantsKaryawan) {
+                window.location.hash = "";
+            }
+            cekRouting(wantsKaryawan);
+        });
+
+        document.getElementById("form-absensi").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const cfg = getSettings();
+            if (!cfg.allowAbsen) {
+                tampilkanModalNotif("modal-danger", "Absensi Ditutup Admin", "Sistem pencatatan absensi masuk sedang dinonaktifkan oleh administrator.", "Akses Dibatasi");
+                return;
+            }
+
+            const proofPhoto = sessionStorage.getItem("current_proof_photo");
+            if (!proofPhoto) {
+                mulaiAksesKaryawanDenganKamera();
+                return;
+            }
+
+            const nama = document.getElementById("input-nama").value.trim();
+            const statusDipilih = document.getElementById("input-status").value;
+            const jam_masuk = getWaktuSekarang();
+            const hhmmNow = getJamMenitSekarang();
+
+            let statusFinal = statusDipilih;
+            if (statusDipilih !== "Izin" && statusDipilih !== "Sakit") {
+                statusFinal = evaluasikanWaktuMasuk(hhmmNow, nama, true, statusDipilih);
+            } else {
+                tampilkanModalNotif(
+                    "modal-warning",
+                    `Absensi ${statusDipilih} Tercatat`,
+                    `Status kehadiran ${statusDipilih} untuk ${nama} telah disimpan pada pukul ${hhmmNow}.`,
+                    `Status: ${statusDipilih}`
+                );
+            }
+
+            document.getElementById("gaji-jam-acu").value = hhmmNow;
+
+            let dataLokal = JSON.parse(localStorage.getItem("data_absensi_lokal") || "[]");
+            dataLokal.unshift({ jam_masuk, nama, status_pekerja: statusFinal, foto_bukti: proofPhoto });
+            localStorage.setItem("data_absensi_lokal", JSON.stringify(dataLokal));
+            renderTabelAbsensi(dataLokal);
+
+            document.getElementById("input-nama").value = "";
+        });
+
+        function muatDataAbsensi() {
+            let dataLokal = JSON.parse(localStorage.getItem("data_absensi_lokal") || "[]");
+            renderTabelAbsensi(dataLokal);
+        }
+
+        function renderTabelAbsensi(data) {
+            const tbody = document.getElementById("tbody-absensi");
+            tbody.innerHTML = "";
+            data.forEach((item, index) => {
+                const badgeClass = "badge-" + item.status_pekerja.toLowerCase();
+                let labelTampil = item.status_pekerja;
+                if (item.status_pekerja === "Hadir") labelTampil = "Hadir (Tepat Waktu)";
+                if (item.status_pekerja === "KurangTepat") labelTampil = "Kurang Tepat Waktu";
+                if (item.status_pekerja === "Terlambat") labelTampil = "Terlambat";
+
+                const fotoHtml = item.foto_bukti
+                    ? `<img src="${item.foto_bukti}" class="table-proof-thumb" alt="Bukti" onclick="perbesarFotoBukti('${item.foto_bukti}', '${item.nama.replace(/'/g, "\\'")}')">`
+                    : `<span style="color:#94a3b8; font-size:12px;">Tanpa Foto</span>`;
+
+                const tr = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${fotoHtml}</td>
+                        <td>${item.jam_masuk}</td>
+                        <td>${item.nama}</td>
+                        <td><span class="badge ${badgeClass}">${labelTampil}</span></td>
+                    </tr>
+                `;
+                tbody.innerHTML += tr;
+            });
+        }
+
+        document.getElementById("form-gaji").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const tanggal = getWaktuSekarang();
+            const nama = document.getElementById("gaji-nama").value.trim();
+            const jabatan = document.getElementById("gaji-jabatan").value.trim();
+            const jamMasukAcu = document.getElementById("gaji-jam-acu").value || "-";
+            const pokok = parseFloat(document.getElementById("gaji-pokok").value) || 0;
+            const bonus = parseFloat(document.getElementById("gaji-bonus").value) || 0;
+            const potongan = parseFloat(document.getElementById("gaji-potongan").value) || 0;
+            const total = Math.max(0, pokok + bonus - potongan);
+            const status = document.getElementById("gaji-status").value;
+
+            let dataGaji = JSON.parse(localStorage.getItem("data_gaji_lokal") || "[]");
+            dataGaji.unshift({ tanggal, nama, jabatan, jamMasukAcu, pokok, bonus, potongan, total, status });
+            localStorage.setItem("data_gaji_lokal", JSON.stringify(dataGaji));
+            renderTabelGaji(dataGaji);
+
+            document.getElementById("gaji-nama").value = "";
+            document.getElementById("gaji-jabatan").value = "";
+            document.getElementById("gaji-pokok").value = "";
+            hitungOtomatisGaji();
+        });
+
+        function muatDataGaji() {
+            let dataGaji = JSON.parse(localStorage.getItem("data_gaji_lokal") || "[]");
+            renderTabelGaji(dataGaji);
+        }
+
+        function renderTabelGaji(data) {
+            const tbody = document.getElementById("tbody-gaji");
+            tbody.innerHTML = "";
+            data.forEach((item, index) => {
+                const badgeClass = "badge-" + item.status.toLowerCase();
+                const bonusVal = Number(item.bonus) || 0;
+                const potVal = Number(item.potongan) || 0;
+                const tr = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.tanggal}</td>
+                        <td>${item.nama}</td>
+                        <td>${item.jabatan}</td>
+                        <td>${item.jamMasukAcu || "-"}</td>
+                        <td>${formatRupiah(item.pokok)}</td>
+                        <td class="${bonusVal > 0 ? 'text-plus' : ''}">${bonusVal > 0 ? '+' + formatRupiah(bonusVal) : formatRupiah(0)}</td>
+                        <td class="${potVal > 0 ? 'text-minus' : ''}">${potVal > 0 ? '-' + formatRupiah(potVal) : formatRupiah(0)}</td>
+                        <td><strong>${formatRupiah(item.total)}</strong></td>
+                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                    </tr>
+                `;
+                tbody.innerHTML += tr;
+            });
+        }
+
+        document.getElementById("form-absensi-keluar").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const nama = document.getElementById("keluar-nama").value.trim();
+            const jam_masuk = document.getElementById("keluar-jam-masuk").value || "-";
+            const status_pulang = document.getElementById("keluar-status").value;
+            const jam_keluar = getWaktuSekarang();
+
+            let dataKeluar = JSON.parse(localStorage.getItem("data_keluar_lokal") || "[]");
+            dataKeluar.unshift({ jam_masuk, jam_keluar, nama, status_pulang });
+            localStorage.setItem("data_keluar_lokal", JSON.stringify(dataKeluar));
+            renderTabelKeluar(dataKeluar);
+
+            document.getElementById("keluar-nama").value = "";
+        });
+
+        function muatDataKeluar() {
+            let dataKeluar = JSON.parse(localStorage.getItem("data_keluar_lokal") || "[]");
+            renderTabelKeluar(dataKeluar);
+        }
+
+        function renderTabelKeluar(data) {
+            const tbody = document.getElementById("tbody-keluar");
+            tbody.innerHTML = "";
+            data.forEach((item, index) => {
+                const badgeClass = "badge-" + item.status_pulang.toLowerCase();
+                let labelStatus = item.status_pulang;
+                if (item.status_pulang === "Pulang") labelStatus = "Pulang Tepat Waktu";
+                if (item.status_pulang === "Lembur") labelStatus = "Pulang Lembur";
+                if (item.status_pulang === "Cepat") labelStatus = "Izin Pulang Cepat";
+
+                const tr = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.jam_masuk}</td>
+                        <td>${item.jam_keluar}</td>
+                        <td>${item.nama}</td>
+                        <td><span class="badge ${badgeClass}">${labelStatus}</span></td>
+                    </tr>
+                `;
+                tbody.innerHTML += tr;
+            });
+        }
+
+        function bukaTabLogout() {
+            hentikanKamera();
+            const user = localStorage.getItem("absensi_user") || "-";
+            const loginTime = localStorage.getItem("absensi_login_time") || "-";
+
+            localStorage.setItem("last_logout_user", user);
+            localStorage.setItem("last_logout_in", loginTime);
+
+            localStorage.removeItem("absensi_user");
+            localStorage.removeItem("absensi_login_time");
+            localStorage.removeItem("absensi_login_hhmm");
+            localStorage.removeItem("absensi_user_photo");
+            sessionStorage.removeItem("admin_unlocked");
+            sessionStorage.removeItem("current_proof_photo");
+
+            const baseUrl = window.location.href.split('#')[0].split('?')[0];
+            window.open(baseUrl + "#logout", "_blank");
+            cekRouting(false);
+        }
+
+        function selesaiDanKembaliLogin() {
+            window.location.hash = "";
+            cekRouting(false);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('id-ID', { hour12: false });
+            const el1 = document.getElementById("realtime-clock");
+            const el2 = document.getElementById("realtime-clock-out");
+            if (el1) el1.textContent = timeStr;
+            if (el2) el2.textContent = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function exportExcelAbsensi() {
+            const table = document.getElementById("tabel-absensi");
+            const workbook = XLSX.utils.table_to_book(table, { sheet: "Absensi Masuk" });
+            XLSX.writeFile(workbook, "Laporan_Absensi_Masuk_Staf.xlsx");
+        }
+
+        function exportExcelGaji() {
+            const table = document.getElementById("tabel-gaji");
+            const workbook = XLSX.utils.table_to_book(table, { sheet: "Data Gaji" });
+            XLSX.writeFile(workbook, "Laporan_Gaji_Staf.xlsx");
+        }
+
+        function exportExcelKeluar() {
+            const table = document.getElementById("tabel-keluar");
+            const workbook = XLSX.utils.table_to_book(table, { sheet: "Absensi Pulang" });
+            XLSX.writeFile(workbook, "Laporan_Jam_Keluar_Staf.xlsx");
+        }
+
+        cekRouting(false);
+    </script>
+
+</body>
+</html>
